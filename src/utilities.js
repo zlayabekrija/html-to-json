@@ -13,7 +13,10 @@ export const nodeToJson = (current, $) => {
   });
   node['tag'] = current[0].name;
   node['children'] = [];
-  node['textNode'] = current.text();
+  node['textNode'] = current
+    .text()
+    .replace(/\n|\s{2,}/g, ' ')
+    .trim();
   for (const child of current.children()) {
     node['children'].push(nodeToJson($(child), $));
   }
@@ -35,11 +38,11 @@ export const createFile = (data, fileName = 'html-tree.json', directory = 'data'
 };
 
 const createDirectory = (directory) => {
-  if (!fs.existsSync(directory)) {
-    fs.mkdir(directory, (err) => {
-      if (err) {
-        messages.error([err]);
-      }
-    });
+  try {
+    if (!fs.existsSync(directory)) {
+      fs.mkdirSync(directory);
+    }
+  } catch (error) {
+    messages.error([error]);
   }
 };
