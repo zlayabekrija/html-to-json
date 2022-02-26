@@ -2,9 +2,9 @@ import yargs from 'yargs';
 import {hideBin} from 'yargs/helpers';
 import cheerio from 'cheerio';
 import request from 'request';
-import {validateCli} from './src/validations.js';
+import {validateCli} from './src/stdin/cli_validations.js';
 import messages from './src/stdout/messages.js';
-import {nodeToJson} from './src/utilities.js';
+import {nodeToJson} from './src/utilities/utilities.js';
 import cliArguments from './src/stdin/cli_arguments.js';
 import {createFile} from './src/stdio/fs_utilities.js';
 // cli arguments
