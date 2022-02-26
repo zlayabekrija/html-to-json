@@ -1,48 +1,26 @@
-import fs from 'fs';
-import path from 'path';
-import messages from './messages.js';
-
-export const nodeToJson = (current, $) => {
+export const nodeToJson = (currentNode, jQuery) => {
   const node = {};
-  Object.entries(current.attr()).forEach(([key, value]) => {
+  Object.entries(currentNode.attr()).forEach(([key, value]) => {
     if (key === 'class') {
-      node[key] = value.split(' ');
+      node[key] = value.split(' ').filter((cl) => !!cl.length);
     } else {
       node[key] = value;
     }
   });
-  node['tag'] = current[0].name;
+  node['tag'] = currentNode[0].name;
   node['children'] = [];
-  node['textNode'] = current
-    .text()
-    .replace(/\n|\s{2,}/g, ' ')
-    .trim();
-  for (const child of current.children()) {
-    node['children'].push(nodeToJson($(child), $));
+  if (isTextElement(currentNode.children())) {
+    node['textNode'] = currentNode
+      .text()
+      .replace(/\n|\s{2,}/g, ' ')
+      .trim();
+  }
+  for (const child of currentNode.children()) {
+    node['children'].push(nodeToJson(jQuery(child), jQuery));
   }
   return node;
 };
 
-export const createFile = (data, fileName = 'html-tree.json', directory = 'data') => {
-  if (directory) createDirectory(path.join(process.cwd(), directory));
-  const outputFile = path.join(process.cwd(), `/${directory}`, fileName);
-  fs.writeFile(outputFile, data, 'utf8', (err) => {
-    if (err) {
-      messages.error([err, `Could not save file, ${fileName}`]);
-      process.exit(1);
-    } else {
-      messages.success(['Successfully extracted data and saved to']);
-      messages.info([fileName]);
-    }
-  });
-};
-
-const createDirectory = (directory) => {
-  try {
-    if (!fs.existsSync(directory)) {
-      fs.mkdirSync(directory);
-    }
-  } catch (error) {
-    messages.error([error]);
-  }
+const isTextElement = (currentNode) => {
+  return !currentNode.length;
 };

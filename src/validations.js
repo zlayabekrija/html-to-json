@@ -1,4 +1,4 @@
-import messages from './messages.js';
+import messages from './stdout/messages.js';
 export function validateCli(url) {
   if (!url) {
     messages.error(['Url flag is missing', 'Process exits with an error']);

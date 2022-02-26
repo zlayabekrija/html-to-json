@@ -3,29 +3,30 @@ import {hideBin} from 'yargs/helpers';
 import cheerio from 'cheerio';
 import request from 'request';
 import {validateCli} from './src/validations.js';
-import messages from './src/messages.js';
-import {createFile, nodeToJson} from './src/utilities.js';
+import messages from './src/stdout/messages.js';
+import {nodeToJson} from './src/utilities.js';
+import cliArguments from './src/stdin/cli_arguments.js';
+import {createFile} from './src/stdio/fs_utilities.js';
+// cli arguments
+const {url, file, directory, startingNode} = yargs(hideBin(process.argv)).argv;
 
-const {url, file, dir} = yargs(hideBin(process.argv)).argv;
-
-//validate necessary arguments
+// validate necessary arguments
 validateCli(url);
 
-//default filename
-let fileName = 'html-tree.json';
-if (file) fileName = `${file}.json`;
+// get filename
+const fileName = cliArguments.fileName(file);
+// get directory name
+const currentDirectory = cliArguments.dirName(directory);
+// default starting node
+const startNode = cliArguments.startingNode(startingNode);
 
-let directory = 'data';
-if (dir) directory = dir;
-
-let result = {};
 request(url, function (_, response, body) {
   messages.success(['Request responded with status', response && response.statusCode, 'extracting data started...']);
   const $ = cheerio.load(body);
-  const child = $('html')[0];
+  const child = $(startNode)[0];
 
-  result = nodeToJson($(child), $);
+  const result = nodeToJson($(child), $);
 
   const json = JSON.stringify(result, null, 4);
-  createFile(json, fileName, directory);
+  createFile(json, fileName, currentDirectory);
 });
